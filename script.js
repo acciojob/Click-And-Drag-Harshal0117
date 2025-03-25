@@ -1,43 +1,38 @@
-// Your code here.
-let draggedItem = null;
-let offsetX = 0, offsetY = 0;
+const container = document.querySelector(".container");
+const cubes = document.querySelectorAll(".cube");
 
-// Select all items
-const items = document.querySelectorAll(".item");
+let selectedCube = null;
+let offsetX, offsetY;
 
-items.forEach(item => {
-  item.addEventListener("mousedown", (e) => {
-    draggedItem = item;
-    offsetX = e.clientX - item.getBoundingClientRect().left;
-    offsetY = e.clientY - item.getBoundingClientRect().top;
-    item.style.position = "absolute";
-    item.style.zIndex = "1000";
-  });
+cubes.forEach(cube => {
+    cube.addEventListener("mousedown", (event) => {
+        selectedCube = event.target;
+        const rect = selectedCube.getBoundingClientRect();
+        offsetX = event.clientX - rect.left;
+        offsetY = event.clientY - rect.top;
+        selectedCube.style.zIndex = 1000;
+    });
 });
 
-document.addEventListener("mousemove", (e) => {
-  if (!draggedItem) return;
-  
-  let x = e.clientX - offsetX;
-  let y = e.clientY - offsetY;
-  
-  // Ensure the item stays within bounds
-  const container = document.querySelector(".items");
-  const rect = container.getBoundingClientRect();
-  const itemRect = draggedItem.getBoundingClientRect();
-  
-  if (x < rect.left) x = rect.left;
-  if (y < rect.top) y = rect.top;
-  if (x + itemRect.width > rect.right) x = rect.right - itemRect.width;
-  if (y + itemRect.height > rect.bottom) y = rect.bottom - itemRect.height;
-  
-  draggedItem.style.left = x + "px";
-  draggedItem.style.top = y + "px";
+document.addEventListener("mousemove", (event) => {
+    if (!selectedCube) return;
+    
+    const containerRect = container.getBoundingClientRect();
+    let newX = event.clientX - containerRect.left - offsetX;
+    let newY = event.clientY - containerRect.top - offsetY;
+
+    // Ensure the cube stays within the container boundaries
+    newX = Math.max(0, Math.min(containerRect.width - selectedCube.offsetWidth, newX));
+    newY = Math.max(0, Math.min(containerRect.height - selectedCube.offsetHeight, newY));
+    
+    selectedCube.style.position = "absolute";
+    selectedCube.style.left = `${newX}px`;
+    selectedCube.style.top = `${newY}px`;
 });
 
 document.addEventListener("mouseup", () => {
-  if (draggedItem) {
-    draggedItem.style.zIndex = "1";
-    draggedItem = null;
-  }
+    if (selectedCube) {
+        selectedCube.style.zIndex = "auto";
+    }
+    selectedCube = null;
 });
